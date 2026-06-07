@@ -8,127 +8,497 @@
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#2196f3">
 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <style>
+:root{
+    --bg1:#0b1220;
+    --bg2:#111c33;
+    --card:rgba(255,255,255,0.08);
+    --border:rgba(255,255,255,0.15);
+    --text:#e5e7eb;
+    --muted:rgba(229,231,235,0.7);
+    --green:#22c55e;
+    --red:#ef4444;
+    --blue:#3b82f6;
+    --yellow:#f59e0b;
+    --gold:#facc15;
+}
+
+*{
+    box-sizing:border-box;
+}
+
 body{
-    font-family: Arial, sans-serif;
-    max-width: 700px;
-    margin: auto;
-    padding: 20px;
+    margin:0;
+    font-family:system-ui, Arial, sans-serif;
+    background:radial-gradient(circle at top, var(--bg2), var(--bg1));
+    color:var(--text);
 }
 
-input, select, button{
-    width: 100%;
-    padding: 10px;
-    margin: 5px 0;
-    box-sizing: border-box;
+.container{
+    max-width:760px;
+    margin:auto;
+    padding:18px;
 }
 
-button{
-    cursor: pointer;
+h1{
+    text-align:center;
+    font-size:30px;
+    margin:10px 0 20px;
+}
+
+h2,h3{
+    margin-top:24px;
+    margin-bottom:12px;
 }
 
 .card{
-    border: 1px solid #ccc;
-    border-radius: 10px;
-    padding: 10px;
-    margin-top: 10px;
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:14px;
+    margin-top:12px;
+    backdrop-filter:blur(12px);
+    box-shadow:0 10px 25px rgba(0,0,0,0.35);
+}
+
+input,select{
+    width:100%;
+    padding:12px;
+    margin:6px 0;
+    border-radius:12px;
+    border:1px solid var(--border);
+    background:rgba(255,255,255,0.05);
+    color:var(--text);
+    outline:none;
+    transition:0.2s;
+}
+
+input:focus, select:focus{
+    border-color:var(--blue);
+    box-shadow:0 0 0 3px rgba(59,130,246,0.18);
+}
+
+input::placeholder{
+    color:var(--muted);
+}
+
+button{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    border:none;
+    border-radius:12px;
+    cursor:pointer;
+    font-weight:700;
+    transition:0.2s;
+}
+
+button:hover{
+    transform:translateY(-2px);
+    filter:brightness(1.05);
+}
+
+button:active{
+    transform:scale(0.98);
+}
+
+#btnGuardar{
+    background:linear-gradient(90deg, var(--green), #16a34a);
+    color:white;
+}
+
+#btnCancelar{
+    background:var(--red);
+    color:white;
 }
 
 canvas{
-    margin-top: 20px;
+    margin-top:12px;
+    background:rgba(255,255,255,0.04);
+    border-radius:16px;
+    padding:10px;
 }
 
-.subtitulo{
-    margin-top: 28px;
+.card strong{
+    font-size:18px;
+}
+
+.card button{
+    width:48%;
+    display:inline-block;
+    margin-top:10px;
+}
+
+.card button:first-of-type{
+    background:var(--blue);
+    color:white;
+}
+
+.card button:last-of-type{
+    background:var(--red);
+    color:white;
+}
+
+/* Stats */
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.stat{
+    background:rgba(255,255,255,0.05);
+    border:1px solid rgba(255,255,255,0.10);
+    border-radius:14px;
+    padding:12px;
+}
+
+.stat .num{
+    font-size:24px;
+    font-weight:800;
+    line-height:1.1;
+}
+
+.stat .label{
+    font-size:13px;
+    color:var(--muted);
+    margin-top:4px;
+}
+
+/* Calendario */
+.cal-nav{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:12px;
+}
+
+.cal-nav button{
+    width:44px;
+    height:44px;
+    margin-top:0;
+    border-radius:12px;
+    background:rgba(255,255,255,0.08);
+    color:var(--text);
+    border:1px solid var(--border);
+}
+
+#calendarioTitulo{
+    font-weight:800;
+    text-transform:capitalize;
+    text-align:center;
+    flex:1;
+}
+
+.cal-semana{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+    margin-bottom:8px;
+    font-size:12px;
+    color:var(--muted);
+    text-align:center;
+}
+
+.cal-grid{
+    display:grid;
+    grid-template-columns:repeat(7,1fr);
+    gap:8px;
+}
+
+.cal-day, .cal-empty{
+    min-height:58px;
+    border-radius:14px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+}
+
+.cal-empty{
+    background:transparent;
+}
+
+.cal-day{
+    background:rgba(255,255,255,0.06);
+    border:1px solid rgba(255,255,255,0.10);
+    cursor:pointer;
+    position:relative;
+    transition:0.2s;
+    user-select:none;
+}
+
+.cal-day:hover{
+    transform:translateY(-2px);
+    border-color:rgba(255,255,255,0.22);
+}
+
+.cal-day.marked{
+    background:linear-gradient(180deg, rgba(34,197,94,0.38), rgba(34,197,94,0.18));
+    border-color:rgba(34,197,94,0.55);
+}
+
+.cal-day.disabled{
+    opacity:0.35;
+    cursor:not-allowed;
+    background:rgba(255,255,255,0.03);
+}
+
+.cal-day.today{
+    outline:2px solid rgba(59,130,246,0.8);
+}
+
+.cal-day .num{
+    font-size:16px;
+    font-weight:800;
+}
+
+.cal-day .check{
+    position:absolute;
+    bottom:4px;
+    right:6px;
+    font-size:12px;
+}
+
+.cal-leyenda{
+    margin:10px 0 0;
+    color:var(--muted);
+    font-size:13px;
+}
+
+.cal-resumen{
+    margin-top:8px;
+    font-size:14px;
+    color:var(--text);
+}
+
+/* Medallas */
+.medallas-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:10px;
+}
+
+.medalla{
+    border-radius:16px;
+    padding:12px;
+    border:1px solid rgba(255,255,255,0.10);
+    background:rgba(255,255,255,0.05);
+    min-height:100px;
+}
+
+.medalla.unlocked{
+    border-color:rgba(250,204,21,0.55);
+    background:linear-gradient(180deg, rgba(250,204,21,0.22), rgba(255,255,255,0.05));
+}
+
+.medalla .icono{
+    font-size:24px;
+    margin-bottom:8px;
+}
+
+.medalla .titulo{
+    font-weight:800;
+}
+
+.medalla .desc{
+    margin-top:4px;
+    font-size:13px;
+    color:var(--muted);
+}
+
+.medalla .estado{
+    margin-top:8px;
+    font-size:12px;
+    font-weight:700;
 }
 </style>
 </head>
+
 <body>
+<div class="container">
 
 <h1>🏊 SwimTrack</h1>
 
-<input type="date" id="fecha">
-<input type="number" id="distancia" placeholder="Distancia (m)">
-<input type="text" id="tiempo" placeholder="Tiempo (mm:ss)">
+<div class="card">
+    <input type="date" id="fecha">
+    <input type="number" id="distancia" placeholder="Distancia (m)">
+    <input type="text" id="tiempo" placeholder="Tiempo (mm:ss:ms)">
 
-<select id="estilo">
-    <option>Crol</option>
-    <option>Espalda</option>
-    <option>Pecho</option>
-    <option>Mariposa</option>
-</select>
+    <select id="estilo">
+        <option value="Crol">Crol</option>
+        <option value="Espalda">Espalda</option>
+        <option value="Pecho">Pecho</option>
+        <option value="Mariposa">Mariposa</option>
+    </select>
 
-<select id="tipo">
-    <option>Entrenamiento</option>
-    <option>Competencia</option>
-</select>
+    <select id="tipo">
+        <option>Entrenamiento</option>
+        <option>Competencia</option>
+    </select>
 
-<button id="btnGuardar" onclick="guardar()">Guardar entrenamiento</button>
-<button id="btnCancelar" onclick="cancelarEdicion()" style="display:none;">Cancelar edición</button>
+    <button id="btnGuardar" onclick="guardarRegistro()">Guardar entrenamiento</button>
+    <button id="btnCancelar" onclick="cancelarEdicion()" style="display:none;">Cancelar edición</button>
+</div>
 
-<h2 class="subtitulo">🏆 Récords</h2>
+<h2>📊 Resumen</h2>
+<div class="card">
+    <div class="stats-grid" id="stats"></div>
+</div>
+
+<h2>📅 Calendario de entrenamientos</h2>
+<div class="card">
+    <div class="cal-nav">
+        <button type="button" id="mesAnterior">◀</button>
+        <div id="calendarioTitulo"></div>
+        <button type="button" id="mesSiguiente">▶</button>
+    </div>
+
+    <div class="cal-semana">
+        <div>Lun</div>
+        <div>Mar</div>
+        <div>Mié</div>
+        <div>Jue</div>
+        <div>Vie</div>
+        <div>Sáb</div>
+        <div>Dom</div>
+    </div>
+
+    <div id="calendario" class="cal-grid"></div>
+    <p class="cal-leyenda">Tocá un día para marcarlo. Los domingos están bloqueados.</p>
+    <p id="calendarioResumen" class="cal-resumen"></p>
+</div>
+
+<h2>🏅 Medallas</h2>
+<div class="card">
+    <div class="medallas-grid" id="medallas"></div>
+</div>
+
+<h2>🏆 Récords</h2>
 <div id="records"></div>
 
-<h2 class="subtitulo">📈 Progreso entrenamiento</h2>
-<select id="distanciaGraficaEntreno" onchange="dibujarGrafica('Entrenamiento','distanciaGraficaEntreno','graficaEntreno')"></select>
-<canvas id="graficaEntreno"></canvas>
+<h3>📈 Progreso entrenamiento</h3>
+<div class="card">
+    <select id="distanciaGraficaEntreno"></select>
+    <select id="estiloGraficaEntreno">
+        <option value="todos">Todos</option>
+        <option value="Crol">Crol</option>
+        <option value="Espalda">Espalda</option>
+        <option value="Pecho">Pecho</option>
+        <option value="Mariposa">Mariposa</option>
+    </select>
+    <canvas id="graficaEntreno"></canvas>
+</div>
 
-<h2 class="subtitulo">📈 Progreso competencia</h2>
-<select id="distanciaGraficaComp" onchange="dibujarGrafica('Competencia','distanciaGraficaComp','graficaCompetencia')"></select>
-<canvas id="graficaCompetencia"></canvas>
+<h3>🏆 Progreso competencia</h3>
+<div class="card">
+    <select id="distanciaGraficaComp"></select>
+    <select id="estiloGraficaComp">
+        <option value="todos">Todos</option>
+        <option value="Crol">Crol</option>
+        <option value="Espalda">Espalda</option>
+        <option value="Pecho">Pecho</option>
+        <option value="Mariposa">Mariposa</option>
+    </select>
+    <canvas id="graficaCompetencia"></canvas>
+</div>
 
-<h2 class="subtitulo">📋 Historial</h2>
+<h2>📋 Historial</h2>
 <div id="historial"></div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
 <script>
-let datos = JSON.parse(localStorage.getItem("natacion")) || [];
+const STORAGE_DATOS = "natacion";
+const STORAGE_CAL = "natacion_asistencia";
+
+let datos = JSON.parse(localStorage.getItem(STORAGE_DATOS)) || [];
+datos = datos.map(normalizar);
+let asistencias = JSON.parse(localStorage.getItem(STORAGE_CAL)) || {};
 let editandoIndice = null;
 
-function fechaHoyISO(){
-    return new Date().toISOString().split("T")[0];
+let mesCalendario = new Date();
+mesCalendario.setDate(1);
+
+function hoyISO(){
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const dia = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${dia}`;
+}
+
+function isoToLocalDate(iso){
+    const partes = iso.split("-");
+    const y = Number(partes[0]);
+    const m = Number(partes[1]);
+    const d = Number(partes[2]);
+    return new Date(y, m - 1, d);
+}
+
+function localDateToISO(date){
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, "0");
+    const d = String(date.getDate()).padStart(2, "0");
+    return `${y}-${m}-${d}`;
 }
 
 function formatearFecha(fecha){
     if(!fecha) return "";
-    if(fecha.includes("-")){
-        const partes = fecha.split("-");
-        if(partes.length === 3){
-            const [y, m, d] = partes;
-            return new Date(Number(y), Number(m) - 1, Number(d)).toLocaleDateString();
-        }
-    }
-    return fecha;
+    const partes = fecha.split("-");
+    if(partes.length !== 3) return fecha;
+    const [y, m, d] = partes.map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString("es-ES");
 }
 
 function aSegundos(t){
-    const partes = t.split(":");
-    if(partes.length !== 2) return 0;
+    const partes = String(t).trim().split(":");
+    if(partes.length !== 3) return NaN;
 
-    const m = Number(partes[0]);
-    const s = Number(partes[1]);
+    const mm = Number(partes[0]);
+    const ss = Number(partes[1]);
+    const ms = Number(partes[2]);
 
-    if(Number.isNaN(m) || Number.isNaN(s)) return 0;
-    return m * 60 + s;
+    if(Number.isNaN(mm) || Number.isNaN(ss) || Number.isNaN(ms)) return NaN;
+    if(ss < 0 || ss > 59) return NaN;
+    if(ms < 0 || ms > 999) return NaN;
+
+    return mm * 60 + ss + ms / 1000;
+}
+
+function normalizar(d){
+    return {
+        ...d,
+        distancia: Number(d.distancia),
+        estilo: String(d.estilo).trim(),
+        tipo: String(d.tipo).trim()
+    };
+}
+
+function normalizarDistancia(d){
+    return Number(String(d).trim());
+}
+
+function normalizarEstilo(e){
+    return String(e).trim();
 }
 
 function limpiarFormulario(){
-    document.getElementById("fecha").value = fechaHoyISO();
+    document.getElementById("fecha").value = hoyISO();
     document.getElementById("distancia").value = "";
     document.getElementById("tiempo").value = "";
     document.getElementById("estilo").value = "Crol";
     document.getElementById("tipo").value = "Entrenamiento";
     editandoIndice = null;
-
     document.getElementById("btnGuardar").textContent = "Guardar entrenamiento";
     document.getElementById("btnCancelar").style.display = "none";
 }
 
-function guardar(){
+function guardarRegistro(){
     const fecha = document.getElementById("fecha").value;
-    const distancia = document.getElementById("distancia").value;
-    const tiempo = document.getElementById("tiempo").value;
+    const distancia = Number(document.getElementById("distancia").value);
+    const tiempo = document.getElementById("tiempo").value.trim();
     const estilo = document.getElementById("estilo").value;
     const tipo = document.getElementById("tipo").value;
 
@@ -137,12 +507,22 @@ function guardar(){
         return;
     }
 
+    if(Number.isNaN(distancia) || distancia <= 0){
+        alert("La distancia debe ser un número válido");
+        return;
+    }
+
+    if(!/^\d{1,2}:[0-5]\d:\d{1,3}$/.test(tiempo) || Number.isNaN(aSegundos(tiempo))){
+        alert("El tiempo debe tener formato mm:ss:ms");
+        return;
+    }
+
     const registro = {
-        fecha: fecha,
-        distancia: distancia,
-        tiempo: tiempo,
-        estilo: estilo,
-        tipo: tipo
+        fecha,
+        distancia: normalizarDistancia(distancia),
+        tiempo,
+        estilo: normalizarEstilo(estilo),
+        tipo: normalizarEstilo(tipo)
     };
 
     if(editandoIndice === null){
@@ -151,16 +531,14 @@ function guardar(){
         datos[editandoIndice] = registro;
     }
 
-    localStorage.setItem("natacion", JSON.stringify(datos));
-
+    localStorage.setItem(STORAGE_DATOS, JSON.stringify(datos));
     limpiarFormulario();
-    mostrar();
+    mostrarTodo();
 }
 
 function editarRegistro(indice){
     const d = datos[indice];
-
-    document.getElementById("fecha").value = d.fecha || fechaHoyISO();
+    document.getElementById("fecha").value = d.fecha || hoyISO();
     document.getElementById("distancia").value = d.distancia;
     document.getElementById("tiempo").value = d.tiempo;
     document.getElementById("estilo").value = d.estilo;
@@ -169,7 +547,6 @@ function editarRegistro(indice){
     editandoIndice = indice;
     document.getElementById("btnGuardar").textContent = "Actualizar entrenamiento";
     document.getElementById("btnCancelar").style.display = "block";
-
     window.scrollTo({ top: 0, behavior: "smooth" });
 }
 
@@ -178,12 +555,10 @@ function cancelarEdicion(){
 }
 
 function borrarRegistro(indice){
-    if(!confirm("¿Seguro que quieres borrar este registro?")){
-        return;
-    }
+    if(!confirm("¿Seguro que quieres borrar este registro?")) return;
 
     datos.splice(indice, 1);
-    localStorage.setItem("natacion", JSON.stringify(datos));
+    localStorage.setItem(STORAGE_DATOS, JSON.stringify(datos));
 
     if(editandoIndice !== null){
         if(editandoIndice === indice){
@@ -193,10 +568,151 @@ function borrarRegistro(indice){
         }
     }
 
-    mostrar();
+    mostrarTodo();
 }
 
-function mostrar(){
+function guardarAsistencias(){
+    localStorage.setItem(STORAGE_CAL, JSON.stringify(asistencias));
+}
+
+function esDomingo(iso){
+    return isoToLocalDate(iso).getDay() === 0;
+}
+
+function toggleAsistencia(iso){
+    if(esDomingo(iso)) return;
+
+    if(asistencias[iso]){
+        delete asistencias[iso];
+    } else {
+        asistencias[iso] = true;
+    }
+
+    guardarAsistencias();
+    mostrarTodo();
+}
+
+function obtenerFechasMarcadas(){
+    return Object.keys(asistencias)
+        .filter(f => asistencias[f])
+        .sort();
+}
+
+function sonSeguidas(isoAnterior, isoActual){
+    const a = isoToLocalDate(isoAnterior);
+    const b = isoToLocalDate(isoActual);
+    const diff = Math.round((b - a) / 86400000);
+
+    if(diff === 1) return true;
+    if(diff === 2 && a.getDay() === 6 && b.getDay() === 1) return true;
+
+    return false;
+}
+
+function calcularRachas(){
+    const fechas = obtenerFechasMarcadas();
+
+    if(fechas.length === 0){
+        return { actual: 0, max: 0, total: 0 };
+    }
+
+    let max = 1;
+    let temp = 1;
+
+    for(let i = 1; i < fechas.length; i++){
+        if(sonSeguidas(fechas[i - 1], fechas[i])){
+            temp++;
+        } else {
+            temp = 1;
+        }
+        if(temp > max) max = temp;
+    }
+
+    return {
+        actual: temp,
+        max,
+        total: fechas.length
+    };
+}
+
+function renderStats(){
+    const { actual, max, total } = calcularRachas();
+    const totalEntrenos = datos.filter(d => d.tipo === "Entrenamiento").length;
+    const totalComp = datos.filter(d => d.tipo === "Competencia").length;
+
+    document.getElementById("stats").innerHTML = `
+        <div class="stat">
+            <div class="num">${total}</div>
+            <div class="label">Días marcados</div>
+        </div>
+        <div class="stat">
+            <div class="num">${actual}</div>
+            <div class="label">Racha actual</div>
+        </div>
+        <div class="stat">
+            <div class="num">${max}</div>
+            <div class="label">Racha máxima</div>
+        </div>
+        <div class="stat">
+            <div class="num">${totalEntrenos + totalComp}</div>
+            <div class="label">Registros guardados</div>
+        </div>
+    `;
+}
+
+function renderMedallas(){
+    const { actual, max, total } = calcularRachas();
+
+    const medallas = [
+        {
+            icono: "🥇",
+            titulo: "Primer chapuzón",
+            desc: "Marca tu primer día de entrenamiento.",
+            unlocked: total >= 1
+        },
+        {
+            icono: "🔥",
+            titulo: "Constancia",
+            desc: "Marca 5 días en el calendario.",
+            unlocked: total >= 5
+        },
+        {
+            icono: "⚡",
+            titulo: "Racha 3",
+            desc: "Logra 3 días seguidos.",
+            unlocked: actual >= 3 || max >= 3
+        },
+        {
+            icono: "🏅",
+            titulo: "Racha 7",
+            desc: "Logra 7 días seguidos.",
+            unlocked: actual >= 7 || max >= 7
+        },
+        {
+            icono: "💪",
+            titulo: "Veterano",
+            desc: "Marca 15 días en total.",
+            unlocked: total >= 15
+        },
+        {
+            icono: "👑",
+            titulo: "Leyenda",
+            desc: "Marca 30 días en total.",
+            unlocked: total >= 30
+        }
+    ];
+
+    document.getElementById("medallas").innerHTML = medallas.map(m => `
+        <div class="medalla ${m.unlocked ? "unlocked" : ""}">
+            <div class="icono">${m.icono}</div>
+            <div class="titulo">${m.titulo}</div>
+            <div class="desc">${m.desc}</div>
+            <div class="estado">${m.unlocked ? "Desbloqueada" : "Bloqueada"}</div>
+        </div>
+    `).join("");
+}
+
+function mostrarHistorial(){
     let html = "";
 
     datos.slice().reverse().forEach((d, indiceReverso) => {
@@ -212,26 +728,28 @@ function mostrar(){
 
             <button onclick="editarRegistro(${indiceReal})">✏️ Editar</button>
             <button onclick="borrarRegistro(${indiceReal})">🗑️ Borrar</button>
-        </div>
-        `;
+        </div>`;
     });
 
-    document.getElementById("historial").innerHTML = html || "<p>No hay entrenamientos todavía.</p>";
+    document.getElementById("historial").innerHTML =
+        html || "<p>No hay entrenamientos todavía.</p>";
+}
 
+function mostrarRecords(){
     let recordsEntreno = {};
     let recordsCompetencia = {};
 
     datos.forEach(d => {
         const seg = aSegundos(d.tiempo);
+        if(Number.isNaN(seg)) return;
 
-        const destino = d.tipo === "Competencia"
-            ? recordsCompetencia
-            : recordsEntreno;
+        const distancia = normalizarDistancia(d.distancia);
+        const destino = d.tipo === "Competencia" ? recordsCompetencia : recordsEntreno;
 
-        if(!destino[d.distancia] || seg < destino[d.distancia].seg){
-            destino[d.distancia] = {
+        if(!destino[distancia] || seg < destino[distancia].seg){
+            destino[distancia] = {
                 tiempo: d.tiempo,
-                seg: seg
+                seg
             };
         }
     });
@@ -248,8 +766,7 @@ function mostrar(){
             rhtml += `
             <div class="card">
                 🥇 ${distancia} m → ${recordsEntreno[distancia].tiempo}
-            </div>
-            `;
+            </div>`;
         });
     }
 
@@ -263,31 +780,25 @@ function mostrar(){
             rhtml += `
             <div class="card">
                 🥇 ${distancia} m → ${recordsCompetencia[distancia].tiempo}
-            </div>
-            `;
+            </div>`;
         });
     }
 
     document.getElementById("records").innerHTML = rhtml;
-
-    actualizarSelectorDistancias("Entrenamiento", "distanciaGraficaEntreno");
-    actualizarSelectorDistancias("Competencia", "distanciaGraficaComp");
-
-    dibujarGrafica("Entrenamiento", "distanciaGraficaEntreno", "graficaEntreno");
-    dibujarGrafica("Competencia", "distanciaGraficaComp", "graficaCompetencia");
 }
 
-function actualizarSelectorDistancias(tipo, selectorId){
+function actualizarSelector(tipo, selectorId){
     const selector = document.getElementById(selectorId);
 
     const distancias = [...new Set(
         datos
+            .map(normalizar)
             .filter(d => d.tipo === tipo)
-            .map(d => Number(d.distancia))
+            .map(d => d.distancia)
     )]
-    .filter(n => !Number.isNaN(n))
-    .sort((a, b) => a - b);
+    .sort((a,b)=>a-b);
 
+    const valorAnterior = selector.value;
     selector.innerHTML = "";
 
     if(distancias.length === 0){
@@ -308,14 +819,15 @@ function actualizarSelectorDistancias(tipo, selectorId){
         selector.appendChild(opcion);
     });
 
-    if(!selector.value){
+    if(distancias.includes(Number(valorAnterior))){
+        selector.value = valorAnterior;
+    } else {
         selector.value = distancias[0];
     }
 }
 
 function dibujarGrafica(tipo, selectorId, canvasId){
     const selector = document.getElementById(selectorId);
-
     const chartKey = canvasId + "Chart";
 
     if(selector.disabled || selector.value === ""){
@@ -328,8 +840,18 @@ function dibujarGrafica(tipo, selectorId, canvasId){
 
     const distanciaSeleccionada = Number(selector.value);
 
+    const estiloSeleccionado = tipo === "Entrenamiento"
+        ? document.getElementById("estiloGraficaEntreno").value
+        : document.getElementById("estiloGraficaComp").value;
+
     const registros = datos
-        .filter(d => d.tipo === tipo && Number(d.distancia) === distanciaSeleccionada);
+        .map(normalizar)
+        .filter(d =>
+            d.tipo === tipo &&
+            d.distancia === distanciaSeleccionada &&
+            (estiloSeleccionado === "todos" || d.estilo === estiloSeleccionado)
+        )
+        .sort((a, b) => a.fecha.localeCompare(b.fecha));
 
     const labels = registros.map(d => formatearFecha(d.fecha));
     const tiempos = registros.map(d => aSegundos(d.tiempo));
@@ -338,14 +860,12 @@ function dibujarGrafica(tipo, selectorId, canvasId){
         window[chartKey].destroy();
     }
 
-    const ctx = document.getElementById(canvasId);
-
-    window[chartKey] = new Chart(ctx, {
+    window[chartKey] = new Chart(document.getElementById(canvasId), {
         type: "line",
         data: {
-            labels: labels,
+            labels,
             datasets: [{
-                label: `${tipo} - ${distanciaSeleccionada} m (segundos)`,
+                label: `${tipo} - ${distanciaSeleccionada} m`,
                 data: tiempos,
                 tension: 0.3
             }]
@@ -353,17 +873,114 @@ function dibujarGrafica(tipo, selectorId, canvasId){
         options: {
             responsive: true,
             scales: {
-                y: {
-                    reverse: true
-                }
+                y: { reverse: true }
             }
         }
     });
 }
 
-document.getElementById("fecha").value = fechaHoyISO();
-mostrar();
+function renderCalendario(){
+    const contenedor = document.getElementById("calendario");
+    const titulo = document.getElementById("calendarioTitulo");
+    const resumen = document.getElementById("calendarioResumen");
+
+    const anio = mesCalendario.getFullYear();
+    const mes = mesCalendario.getMonth();
+
+    titulo.textContent = mesCalendario.toLocaleDateString("es-ES", {
+        month: "long",
+        year: "numeric"
+    });
+
+    contenedor.innerHTML = "";
+
+    const primerDia = new Date(anio, mes, 1);
+    const diasMes = new Date(anio, mes + 1, 0).getDate();
+    const corrimiento = (primerDia.getDay() + 6) % 7; // lunes = 0, domingo = 6
+
+    for(let i = 0; i < corrimiento; i++){
+        const vacio = document.createElement("div");
+        vacio.className = "cal-empty";
+        contenedor.appendChild(vacio);
+    }
+
+    let marcadosMes = 0;
+    const hoy = hoyISO();
+
+    for(let dia = 1; dia <= diasMes; dia++){
+        const fecha = new Date(anio, mes, dia);
+        const iso = localDateToISO(fecha);
+        const esDomingo = fecha.getDay() === 0;
+        const marcado = !!asistencias[iso];
+
+        if(marcado) marcadosMes++;
+
+        const celda = document.createElement("div");
+        celda.className = "cal-day";
+        if(marcado) celda.classList.add("marked");
+        if(esDomingo) celda.classList.add("disabled");
+        if(iso === hoy) celda.classList.add("today");
+
+        celda.innerHTML = `
+            <div class="num">${dia}</div>
+            ${marcado ? '<div class="check">✅</div>' : ''}
+        `;
+
+        if(!esDomingo){
+            celda.addEventListener("click", () => toggleAsistencia(iso));
+        } else {
+            celda.title = "Domingo bloqueado";
+        }
+
+        contenedor.appendChild(celda);
+    }
+
+    const { actual, max, total } = calcularRachas();
+    resumen.textContent = `Este mes marcaste ${marcadosMes} día(s). Racha actual: ${actual}. Racha máxima: ${max}. Total histórico: ${total}.`;
+}
+
+function mostrarTodo(){
+    renderStats();
+    renderMedallas();
+    mostrarRecords();
+    actualizarSelector("Entrenamiento", "distanciaGraficaEntreno");
+    actualizarSelector("Competencia", "distanciaGraficaComp");
+    dibujarGrafica("Entrenamiento", "distanciaGraficaEntreno", "graficaEntreno");
+    dibujarGrafica("Competencia", "distanciaGraficaComp", "graficaCompetencia");
+    mostrarHistorial();
+    renderCalendario();
+}
+
+document.getElementById("mesAnterior").addEventListener("click", () => {
+    mesCalendario.setMonth(mesCalendario.getMonth() - 1);
+    renderCalendario();
+});
+
+document.getElementById("mesSiguiente").addEventListener("click", () => {
+    mesCalendario.setMonth(mesCalendario.getMonth() + 1);
+    renderCalendario();
+});
+
+document.getElementById("distanciaGraficaEntreno").addEventListener("change", () => {
+    dibujarGrafica("Entrenamiento", "distanciaGraficaEntreno", "graficaEntreno");
+});
+
+document.getElementById("estiloGraficaEntreno").addEventListener("change", () => {
+    dibujarGrafica("Entrenamiento", "distanciaGraficaEntreno", "graficaEntreno");
+});
+
+document.getElementById("distanciaGraficaComp").addEventListener("change", () => {
+    dibujarGrafica("Competencia", "distanciaGraficaComp", "graficaCompetencia");
+});
+
+document.getElementById("estiloGraficaComp").addEventListener("change", () => {
+    dibujarGrafica("Competencia", "distanciaGraficaComp", "graficaCompetencia");
+});
+
+document.getElementById("fecha").value = hoyISO();
+mostrarTodo();
 </script>
 
+</div>
 </body>
 </html>
