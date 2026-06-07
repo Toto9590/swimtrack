@@ -107,6 +107,8 @@ button:active{
 #btnGuardar{
     background:linear-gradient(90deg, var(--green), #16a34a);
     color:white;
+    width:100%;
+    display:block;
 }
 
 #btnCancelar{
@@ -340,7 +342,7 @@ canvas{
         <option>Competencia</option>
     </select>
 
-    <button id="btnGuardar" onclick="guardarRegistro()">Guardar entrenamiento</button>
+    <button id="btnGuardar" onclick="guardarRegistro()">Guardar tiempo</button>
     <button id="btnCancelar" onclick="cancelarEdicion()" style="display:none;">Cancelar edición</button>
 </div>
 
@@ -491,7 +493,7 @@ function limpiarFormulario(){
     document.getElementById("estilo").value = "Crol";
     document.getElementById("tipo").value = "Entrenamiento";
     editandoIndice = null;
-    document.getElementById("btnGuardar").textContent = "Guardar entrenamiento";
+    document.getElementById("btnGuardar").textContent = "Guardar tiempo";
     document.getElementById("btnCancelar").style.display = "none";
 }
 
